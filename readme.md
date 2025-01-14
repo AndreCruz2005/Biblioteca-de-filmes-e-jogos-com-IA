@@ -1,6 +1,8 @@
 # Biblioteca de Filmes e Jogos com IA
 Aplicação que permite ao usuário criar e gerenciar uma biblioteca pessoal de jogos e filmes com uso do modelo de IA generativa Gemini. Interface gráfica construída com a biblioteca PyQt5.
 
+<a href="https://ibb.co/HtTVDk4"><img src="https://i.ibb.co/tqp4MWK/img-2025-01-13-22-58-32.png" alt="img-2025-01-13-22-58-32" border="0" /></a>
+
 ## Funcionalidades
 Pesquisa de filmes usando a API do [TMDB](https://developer.themoviedb.org/reference/intro/authentication).
 
