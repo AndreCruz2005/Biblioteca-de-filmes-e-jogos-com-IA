@@ -1,0 +1,8 @@
+# IDE files
+.vscode/
+.pycharm/
+__pycache__
+
+# Files used for persistent storage. Are created during program execution
+caching/
+user_data.json
