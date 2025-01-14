@@ -1,6 +1,6 @@
 import os, json
-# Caminho para o diretório onde este arquivo está, este arquivo deve ficar no mesmo diretório que todos os outros que usam essa variável ###
-path_to_folder = os.path.dirname(os.path.abspath(__file__))
+# Caminho para o diretório onde este arquivo está ###
+path_to_src = os.path.dirname(os.path.abspath(__file__))
 
 # Paleta de cores da GUI ###
 app_color_palette = {
@@ -21,13 +21,13 @@ directories = [
 
 # Cria os diretórios caso não existam
 for dir_name in directories:
-    dir_path = os.path.join(path_to_folder, dir_name)
+    dir_path = os.path.join(path_to_src, dir_name)
     if not os.path.isdir(dir_path):
         os.makedirs(dir_path, exist_ok=True)
 
 
 # Carregar user data ###
-user_data_path = os.path.join(path_to_folder, 'user_data.json')
+user_data_path = os.path.join(path_to_src, 'user_data.json')
 try:
     with open(user_data_path, 'r') as file:
         user_data = json.load(file)
@@ -39,7 +39,7 @@ except FileNotFoundError:
                 'api_keys': {'GOOGLE':"", 'GIANTBOMB':"", 'TMDB':""}}
 
 # Carregar dados de API ###
-api_cache_path = os.path.join(path_to_folder, 'caching/api_data_cache.json')
+api_cache_path = os.path.join(path_to_src, 'caching/api_data_cache.json')
 try:
     with open('caching/api_data_cache.json', 'r') as file:
         cache = json.load(file)

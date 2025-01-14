@@ -1,20 +1,17 @@
-"""
-GUI feita com a biblioteca PyQt5
-API da Gemini AI: https://aistudio.google.com/app/u/1/apikey
-API do GiantBomb: https://www.giantbomb.com/api/
-API do TMDB: https://developer.themoviedb.org/reference/intro/authentication
-"""
+import os, socket, json
 import google.generativeai as genai
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import *
-from .api_calling import get_game_data, get_movie_data, url_to_png
-from core import app_color_palette, path_to_folder, user_data, cache, api_cache_path, user_data_path
-import json, os, socket
+from api_calling import get_game_data, get_movie_data, url_to_png
+from core import user_data, cache, path_to_src
 
 # Inicializa Gemini
-genai.configure(api_key=user_data['api_keys']['GOOGLE'])
+def reconfig_ai():
+    genai.configure(api_key=user_data['api_keys']['GOOGLE'])
+
+reconfig_ai()
 
 # Configurações do modelo de IA
 main_generation_config = {
@@ -27,7 +24,7 @@ main_generation_config = {
 
 # Criar o modelo de IA
 def create_model():
-    instructions_path = os.path.join(path_to_folder, 'model_instructions.txt')
+    instructions_path = os.path.join(path_to_src, 'model_instructions.txt')
 
     model = genai.GenerativeModel(
     model_name="gemini-1.5-flash-8b-latest",
@@ -53,7 +50,8 @@ def internet():
         return True
     except OSError:
         return False
-        
+
+
 #####################
 # QRunnables
 #####################
@@ -97,7 +95,7 @@ class Recommend(AICommandRunnable):
                 cache[self.mode][name] = result # Adiciona o resultado ao cache
 
                 # Salva a imagem do cada item das recomendações no cache caso não hja uma imagem com este título lá
-                path_to_image = os.path.join(path_to_folder, f"caching/images_cache/{self.mode}/{name}.png")
+                path_to_image = os.path.join(path_to_src, f"caching/images_cache/{self.mode}/{name}.png")
                 if not os.path.isfile(path_to_image): 
                     url_to_png(self.mode, result, name)
 
@@ -137,55 +135,9 @@ class Add(AICommandRunnable):
             cache[self.mode][name] = data # Salva item e dados no cache
 
             # Salva imagem no cache
-            path_to_image = os.path.join(path_to_folder, f"caching/images_cache/{self.mode}/{name}.png")
+            path_to_image = os.path.join(path_to_src, f"caching/images_cache/{self.mode}/{name}.png")
             if not os.path.isfile(path_to_image):
                 url_to_png(self.mode, data, name)
-
-class SettingsMenu(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        parent.hbox.addWidget(self)
-        self.hide()
-
-        # Layout
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(10, 10, 10, 800)
-
-        # Titulo
-        self.title = QLabel("Definir chaves de API")
-        self.layout.addWidget(self.title)
-
-        # Campos no qual o usuário colocará as suas chaves para as API com labels para o que cada um faz
-        self.labels = [QLabel(parent=self, text="GEMINI AI"), QLabel(parent=self, text="GIANT BOMB"), QLabel(parent=self, text="THE MOVIE DB")]
-        self.key_fields = [QLineEdit(self), QLineEdit(self), QLineEdit(self)]
-
-        for label, key_field, api_key_data in zip(self.labels, self.key_fields, user_data["api_keys"]):
-            self.layout.addWidget(label)
-
-            self.layout.addWidget(key_field)
-            key_field.setText(user_data["api_keys"][api_key_data])
-            key_field.textChanged.connect(self.update_api_keys)
-
-        self.set_palette()
-
-    def set_palette(self):
-        self.title.setStyleSheet("color: white; font-weight:bold; font-size: 20px;")
-
-        for label in self.labels:
-            label.setStyleSheet("color: white; font-weight: bold;")
-
-        for key_field in self.key_fields:
-            key_field.setStyleSheet("color: white;")
-
-    def setVisibility(self):
-        self.setHidden(not self.isHidden())
-
-    def update_api_keys(self):
-        # Atualiza as chaves de api de acordo com os campos nas configurações
-        for idx, api_key_data in enumerate(user_data["api_keys"]):
-            user_data["api_keys"][api_key_data] = self.key_fields[idx].text()
-        self.parent.reconfig_ai()
 
 
 # Classe para pegar a resposta da IA e APIs em uma thread separada para evitar que o app congele equanto espera as respostas
@@ -269,138 +221,3 @@ class AiResponseThread(QThread):
 
         except Exception as e:
             self.error.emit(str(e))
-
-from library_region import LibaryRegion
-from ai_recommendations_region import AiRecommendationsRegion
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        # Informações de uso do app
-        self.setWindowTitle("Recomendador de Jogos e Filmes")
-        self.mode = 'game'
-        self.language = 'pt' # Vá em frente, implemente duas idiomas no app e uma configuração pra trocar entre elas pela GUI
-        self.user_data = user_data
-
-        # Bibilioteca que será enviada a IA
-        self.movie_library = user_data['movie_library']
-        self.game_library = user_data['game_library']
-
-        # Resultados de pesquisa associados aos seus dados recolhidos da API com base nas recomendações da IA
-        self.movie_recommendations = user_data['movie_recommendations']
-        self.game_recommendations = user_data['game_recommendations']
-
-        # Timer para limitar tempo de resposta de APIs
-        self.timer = QTimer()
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.thread_timeout)
-
-        self.setStyleSheet(f"background-color: {app_color_palette['dark-medium'][self.mode]}")
-        
-        #################################
-        # GUI
-        #################################
-
-        # Define o widget central da janela e o layout horizontal (hbox) onde todos os widgets do app ficarão
-        self.center_widget = QWidget(self)
-        self.setCentralWidget(self.center_widget)
-        self.hbox = QHBoxLayout(self.center_widget)
-        self.hbox.setContentsMargins(0, 0, 0, 0)
-
-        # Menu de configurações
-        self.settings_menu = SettingsMenu(self)
-        
-        # Libary
-        self.library_region = LibaryRegion(self)
-
-        # AI
-        self.ai_recommendation_region = AiRecommendationsRegion(self)
-
-    def ai_response(self):
-        # Pega o texto no prompt de usuário na área de recomendações da IA e deixa a caixa de texto vazia
-        prompt = self.ai_recommendation_region.user_chat_input.text()
-        self.ai_recommendation_region.user_chat_input.setText('')
-        if prompt == "":  # Não enviar prompt vazio
-            return
-        
-        # Formata o prompt de usuário
-        current_libarary = self.game_library if self.mode == "game" else self.movie_library
-        current_recommendations = self.game_recommendations if self.mode == "game" else self.movie_recommendations
-
-        # Omite os campos de data de cada dicionário para reduzir o tamanho do prompt enviado a IA
-        library_for_ai = {key : {'rating':current_libarary[key]['rating'], 'state':current_libarary[key]['state']} for key in current_libarary}
-        recom_for_ai = [key for key in current_recommendations['High Priority']]
-        
-        # Prompt formatado
-        formatted_prompt = {'type': self.mode, 'user_prompt': prompt, 'current_library': library_for_ai, 'current_recommendations': recom_for_ai}
-
-        # Processa a resposta da IA criando uma instância da AiResponseThread
-        self.ai_thread = AiResponseThread(formatted_prompt, current_libarary, current_recommendations, self.mode)
-        self.ai_thread.processing_request.connect(self.lock_user_input)
-        self.ai_thread.error.connect(self.handle_error)
-        self.ai_thread.finished.connect(self.handle_response)
-        self.ai_thread.start()
-
-        # Inicia um timer para a resposta da ai_thread, 60s
-        self.timer.start(60000)
-
-    def lock_user_input(self, stage):
-        # Impende novas mensagens de serem enviadas enquato a IA e as APIs não finalizaram o processamento da última
-        self.ai_recommendation_region.user_chat_input.setReadOnly(True)
-        self.ai_recommendation_region.user_chat_input.setText("")
-
-        # Atualiza o texto da caixa de input com informações sobre o processamento do prompt
-        self.ai_recommendation_region.user_chat_input.setPlaceholderText(stage)
-
-    def handle_response(self, response):
-        self.timer.stop()
-
-        # Função para caso a ai_thread funcione corretamente
-        print(f'Resposta do modelo: {response}')
-
-        # Desbloqueia o campo de input do usuário
-        self.ai_recommendation_region.user_chat_input.setReadOnly(False)
-        self.ai_recommendation_region.user_chat_input.setPlaceholderText("Peça à IA recomendações ou que altere sua biblioteca")
-
-        self.library_region.update()
-        self.ai_recommendation_region.update()
-            
-    def handle_error(self, error):
-        self.timer.stop()
-
-        # Função para exibir mensagens de erro da ai_thread
-        print(error)
-        self.ai_recommendation_region.user_chat_input.setReadOnly(False)
-        self.ai_recommendation_region.user_chat_input.setPlaceholderText(error)
-
-    def thread_timeout(self):
-        # Função para parar a ai_thread se ela levar tempo demais
-        if self.ai_thread.isRunning():
-            self.ai_thread.terminate()
-            self.ai_thread.wait()
-
-        self.handle_error("Resposta demorou demais")
-
-    def reconfig_ai(self):
-        genai.configure(api_key=user_data['api_keys']['GOOGLE'])
-
-    def closeEvent(self, event):
-        # Salva dados de usuário
-        with open(user_data_path, 'w') as file:
-            json.dump(user_data, file)
-
-        # Salva o cache
-        with open(api_cache_path, 'w') as file:
-            json.dump(cache, file)
-
-        event.accept()
-
-
-
-
-
-
-
-
-    

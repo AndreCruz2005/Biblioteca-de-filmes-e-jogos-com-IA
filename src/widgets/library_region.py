@@ -2,7 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import *
-from core import app_color_palette, path_to_folder, os
+from core import app_color_palette, path_to_src, os
 
 # Região à esquerda do app, incluí a caixa da biblioteca e os botões para mudar de modo
 class LibaryRegion(QWidget):
@@ -106,10 +106,10 @@ class LibaryRegion(QWidget):
         self.title.setStyleSheet(f"color: {app_color_palette['light'][mode]}; font-size: 48px; font-weight: bold;")
         self.title.setText(f'MINHA BIBLIOTECA DE {"JOGOS" if self.parent.mode.upper() == 'GAME' else 'FILMES'}')
 
-        # Settings button
+        # Botão de configurações
         self.settings.setStyleSheet("border: none;")
-        self.settings.setIcon(QIcon("img/settings_game.png" if self.parent.mode == "game" else 
-                                    "img/settings_movie.png"))
+        self.settings.setIcon(QIcon(os.path.join(path_to_src, "img", "settings_game.png") if self.parent.mode == "game" else 
+                        os.path.join(path_to_src, "img", "settings_movie.png")))
     
     def update(self):
         # Função para atualizar os filmes e jogos exibidos
@@ -135,7 +135,7 @@ class LibaryRegion(QWidget):
             item_displayer = LibraryItemDisplayer(self.library_content, mode, data=data)
             
             # Configura os elementos do slot da grid de acordo com os dados do item da biblioteca
-            image_path = os.path.join(path_to_folder, f'caching/images_cache/{mode}/{item}.png')
+            image_path = os.path.join(path_to_src, f'caching/images_cache/{mode}/{item}.png')
             item_displayer.image_thumb.setPixmap(QPixmap(image_path))
             item_displayer.title.setText(item)
             item_displayer.rating_bar.setText(str(item_dict['rating']))
@@ -174,7 +174,7 @@ class LibraryItemDisplayer(QWidget):
 
         # Botão para remover item
         self.removal_button = QPushButton(self.image_thumb)
-        self.removal_button.setIcon(QIcon(os.path.join(path_to_folder, 'img/remove_button.png')))
+        self.removal_button.setIcon(QIcon(os.path.join(path_to_src, "img", "remove_button.png")))
         self.removal_button.setStyleSheet("background-color: transparent; border: none;")
         self.removal_button.move(139, 162)
 
