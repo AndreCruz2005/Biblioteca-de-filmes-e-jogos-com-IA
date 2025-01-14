@@ -2,8 +2,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import *
-from core import app_color_palette, path_to_folder
-import os, random
+from core import app_color_palette, path_to_src
+import os, random, sys
 
 # Região à direita no app, incluí caixa de recomendações e a caixa de input do usuário para IA
 class AiRecommendationsRegion(QWidget):
@@ -114,7 +114,7 @@ class AiRecommendationsRegion(QWidget):
             item_displayer = RecommendedItemDisplayer(self.scroll_content, mode)
             data = recomendations['High Priority'][key]
 
-            image_path = os.path.join(path_to_folder, f'caching/images_cache/{mode}/{key}.png')
+            image_path = os.path.join(path_to_src, f'caching/images_cache/{mode}/{key}.png')
             item_displayer.image_thumb.setPixmap(QPixmap(image_path))
             item_displayer.title.setText(key)
 

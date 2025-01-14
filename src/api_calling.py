@@ -1,5 +1,5 @@
 import requests, os
-from core import path_to_folder
+from core import path_to_src
 
 # Função para pesquisar nomes de filmes no TMDB 
 def get_movie_data(movie_name, API_KEY):
@@ -57,7 +57,7 @@ def url_to_png(mode, data, file_name):
     response = requests.get(url)
     if response.status_code == 200:
         try:
-            path = os.path.join(path_to_folder, f'caching/images_cache/{mode}/{file_name}.png')
+            path = os.path.join(path_to_src, f'caching/images_cache/{mode}/{file_name}.png')
             with open(path, 'wb') as file:
                 file.write(response.content)
         except Exception as e:
