@@ -133,12 +133,3 @@ class MainWindow(QMainWindow):
             json.dump(cache, file)
 
         event.accept()
-
-
-
-
-
-
-
-
-    
