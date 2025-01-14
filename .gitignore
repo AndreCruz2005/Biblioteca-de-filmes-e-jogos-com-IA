@@ -5,5 +5,5 @@ __pycache__/
 .idea/
 
 # Files used for persistent storage. Are created during program execution
-caching/
-user_data.json
+src/caching/
+src/user_data.json
