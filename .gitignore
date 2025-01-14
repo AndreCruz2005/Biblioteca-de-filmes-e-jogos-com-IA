@@ -1,7 +1,8 @@
+__pycache__/
+
 # IDE files
 .vscode/
-.pycharm/
-__pycache__
+.idea/
 
 # Files used for persistent storage. Are created during program execution
 caching/
