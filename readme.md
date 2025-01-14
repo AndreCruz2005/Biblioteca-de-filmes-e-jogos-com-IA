@@ -39,11 +39,11 @@ No diretório do projeto, execute o arquivo main.py no terminal
 python main.py
 ```
 ### Configuração das chaves de API
-Uma vez iniciada a aplicação, clique no ícone de engrenagem para exibir a aba de configurações, insira as chaves de API nos seus respectivos campos (atente-se para não deixar espaços vazios em cada campo) e feche a aba de configurações clicando na engrenagem de novo.
+Uma vez iniciada a aplicação, clique no ícone de engrenagem para exibir a aba de configurações, insira as chaves de API em seus respectivos campos (atente-se para não deixar espaços vazios em cada campo) e feche a aba de configurações clicando na engrenagem novamente.
 
 ### Interagindo com o modelo de IA
-Digite seu comando na caixa de entrada no canto inferior direito da tela e envie clicando a tecla ENTER. Exemplos de comando para você experimentar:
-- Recomende-me jogos de ação
+Digite seu comando na caixa de entrada no canto inferior direito da tela e envie clicando a tecla ENTER. Exemplos de comandos que você pode experimentar:
+- Recomende jogos de ação
 - Adicone Minecraft à minha biblioteca
 - Coloque a nota de Minecraft como 10 e o estado como jogando.
 - Adicione 3 jogos de sua escolha à minha biblioteca
